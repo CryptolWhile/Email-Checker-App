@@ -59,7 +59,7 @@ email_checker_app/
 ### 📦 Installation
 
 ```bash
-git clone https://github.com/yourusername/email_checker_app.git
+git clone https://github.com/CryptolWhile/Email-Checker-App.git
 cd email_checker_app
 pip install -r requirements.txt
 ````
