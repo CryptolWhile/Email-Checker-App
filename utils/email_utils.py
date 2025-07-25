@@ -1,4 +1,4 @@
-import imaplib, email
+import re
 from email.message import Message
 
 class Mail:
@@ -13,27 +13,27 @@ def opt_header_to_str(message: Message, header) -> str:
 
 def unwrap_payload(message: Message) -> str:
     if message.is_multipart():
-        return "\n\n".join(unwrap_payload(part) for part in message.get_payload())
-    payload = message.get_payload(decode=True)
-    return payload.decode(errors='replace') if isinstance(payload, bytes) else payload
+        parts = message.get_payload()
+        return "\n\n".join(unwrap_payload(part) for part in parts)
+    else:
+        payload = message.get_payload(decode=True)
+        if isinstance(payload, bytes):
+            payload = payload.decode(errors='replace')
+        return payload
 
 def message_to_mail(message: Message) -> Mail:
-    return Mail(
-        body=unwrap_payload(message),
-        subject=opt_header_to_str(message, 'Subject'),
-        sender=opt_header_to_str(message, 'From')
-    )
+    body = unwrap_payload(message)
+    subject = opt_header_to_str(message, 'Subject')
+    sender = opt_header_to_str(message, 'From')
+    return Mail(body, subject, sender)
 
-def connect_and_fetch_emails(imap_url, user, password, sender_filter):
-    my_mail = imaplib.IMAP4_SSL(imap_url)
-    my_mail.login(user, password)
-    my_mail.select("inbox")
-    _, data = my_mail.search(None, 'FROM', f'"{sender_filter}"')
-    mail_ids = data[0].split()
-    messages = []
-    for num in mail_ids:
-        _, data = my_mail.fetch(num, '(RFC822)')
-        raw_email = data[0][1]
-        msg = email.message_from_bytes(raw_email)
-        messages.append(msg)
-    return messages
+def extract_urls(text):
+    return re.findall(r'https?://[^\s)>\]]+', text)
+
+def expand_url(url):
+    import requests
+    try:
+        response = requests.head(url, allow_redirects=True, timeout=5)
+        return response.url
+    except:
+        return url

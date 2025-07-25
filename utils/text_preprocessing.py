@@ -1,9 +1,4 @@
-import nltk
-import string
-import random
-
-nltk.download('punkt')
-nltk.download('stopwords')
+import nltk, string, random
 
 def lowercase(text): return text.lower()
 
@@ -46,7 +41,8 @@ def normalize_text(text):
     normalization_dict = {
         "u": "you", "ur": "your", "im": "i am", "m": "i am",
         "dont": "do not", "can't": "cannot", "won't": "will not",
-        
+        "wanna": "want to", "gonna": "going to", "ya": "you",
+        "thx": "thanks", "pls": "please", "2": "to", "4": "for",
     }
     for word, norm in normalization_dict.items():
         text = text.replace(f" {word} ", f" {norm} ")
